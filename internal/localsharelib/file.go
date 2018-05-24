@@ -28,6 +28,8 @@ func (fsFile *FsFile) Open() (io.Reader, error) {
 
 func (instance *LocalshareInstance) AddFile(f File) {
 	instance.files[f.Name()] = f
+	// announce the new file list hash through mdns
+	instance.mdnsServer.SetText([]string{hash(instance.files)})
 }
 
 func (instance *LocalshareInstance) SharedFiles() map[string]File {

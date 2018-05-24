@@ -11,17 +11,8 @@ import "github.com/sorribas/localshare/internal/localsharelib"
 type LocalShareWebBindings struct {
 	lsi   *localsharelib.LocalshareInstance
 	w     webview.WebView
-	Peers []serializablePeer       `json:"peers"`
+	Peers []*localsharelib.Peer    `json:"peers"`
 	Files []serializableSharedFile `json:"files"`
-}
-
-type serializablePeer struct {
-	Name  string                   `json:"name"`
-	Files []serializableRemoteFile `json:"files"`
-}
-
-type serializableRemoteFile struct {
-	Name string `json:"name"`
 }
 
 type serializableSharedFile struct {
@@ -44,7 +35,7 @@ func Start(lsi *localsharelib.LocalshareInstance) {
 	w.Eval(string(MustAsset("frontend/bundle.js")))
 
 	lsi.AddFile(localsharelib.NewInMemoryFile("test", []byte("tst")))
-	lswb := &LocalShareWebBindings{lsi, w, []serializablePeer{}, []serializableSharedFile{}}
+	lswb := &LocalShareWebBindings{lsi, w, []*localsharelib.Peer{}, []serializableSharedFile{}}
 	w.Dispatch(func() {
 		w.Bind("localshare", lswb)
 	})
@@ -78,33 +69,17 @@ func (lswb *LocalShareWebBindings) ChooseFile() {
 
 func (lswb *LocalShareWebBindings) listenForPeers() {
 	go func() {
-		ch := lswb.lsi.PeerChannel()
+		ch := lswb.lsi.PeerListChannel()
 		for {
 			<-ch
-			lswb.Peers = peersToSerializable(lswb.lsi.Peers)
-			fmt.Println("new peer", lswb.Peers)
+			lswb.Peers = lswb.lsi.Peers
+			fmt.Println("new peer list", lswb.Peers)
 			lswb.w.Dispatch(func() {
 				lswb.w.Bind("localshare", lswb)
 				lswb.w.Eval("window.update()")
 			})
 		}
 	}()
-}
-
-func peersToSerializable(peers []*localsharelib.Peer) []serializablePeer {
-	result := []serializablePeer{}
-	for _, peer := range peers {
-		files, _ := peer.ListFiles()
-		sfiles := []serializableRemoteFile{}
-		for _, file := range files {
-			sfiles = append(sfiles, serializableRemoteFile{file.Name})
-		}
-
-		speer := serializablePeer{peer.Name, sfiles}
-		result = append(result, speer)
-	}
-
-	return result
 }
 
 func filesToSerializable(files map[string]localsharelib.File) []serializableSharedFile {

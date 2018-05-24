@@ -7,8 +7,9 @@ import "io"
 import "strconv"
 
 type Peer struct {
-	Name  string `json:"name"`
-	entry zeroconf.ServiceEntry
+	Name     string       `json:"name"`
+	FileList []RemoteFile `json:"files"`
+	entry    zeroconf.ServiceEntry
 }
 
 type RemoteFile struct {
@@ -19,6 +20,7 @@ func NewPeer(entry zeroconf.ServiceEntry) *Peer {
 	return &Peer{Name: entry.Instance, entry: entry}
 }
 
+// Get the list of files from the peer's http api.
 func (peer *Peer) ListFiles() ([]RemoteFile, error) {
 	r := []RemoteFile{}
 	address := "http://" + peer.entry.AddrIPv4[0].String() + ":" + strconv.Itoa(peer.entry.Port)

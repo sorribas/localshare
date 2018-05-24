@@ -1,7 +1,9 @@
 package localsharelib
 
 import "bytes"
+import "crypto/sha256"
 import "encoding/json"
+import "fmt"
 import "net"
 import "net/http"
 
@@ -46,4 +48,18 @@ func sendjson(w http.ResponseWriter, data interface{}) {
 		w.WriteHeader(500)
 		w.Write([]byte("internal server error"))
 	}
+}
+
+func hash(v interface{}) string {
+	sha_256 := sha256.New()
+	sha_256.Write([]byte(fmt.Sprintf("%v", v)))
+	return fmt.Sprintf("%x", sha_256.Sum(nil))
+}
+
+func firstOrEmpty(strs []string) string {
+	if len(strs) >= 1 {
+		return strs[0]
+	}
+
+	return ""
 }
