@@ -1,5 +1,6 @@
 package webui
 
+import "encoding/base64"
 import "fmt"
 import "os"
 import "os/user"
@@ -28,14 +29,19 @@ type serializableSharedFile struct {
 }
 
 func Start(lsi *localsharelib.LocalshareInstance) {
+	html := MustAsset("frontend/index.html")
+	b64 := base64.StdEncoding.EncodeToString(html)
 	w := webview.New(webview.Settings{
 		Title:     "LocalShare",
-		URL:       "file:///home/ed/prog/localshareui/index.html",
+		URL:       "data:text/html;base64," + b64,
 		Width:     800,
 		Height:    600,
 		Resizable: true,
 		Debug:     true,
 	})
+
+	w.InjectCSS(string(MustAsset("frontend/style.css")))
+	w.Eval(string(MustAsset("frontend/bundle.js")))
 
 	lsi.AddFile(localsharelib.NewInMemoryFile("test", []byte("tst")))
 	lswb := &LocalShareWebBindings{lsi, w, []serializablePeer{}, []serializableSharedFile{}}
@@ -49,14 +55,13 @@ func Start(lsi *localsharelib.LocalshareInstance) {
 }
 
 func (lswb *LocalShareWebBindings) Download(peerName string, fileName string) {
-	fmt.Println("download")
 	for _, peer := range lswb.lsi.Peers {
 		if peer.Name == peerName {
 			usr, _ := user.Current()
 			f, _ := os.Create(path.Join(usr.HomeDir, "Downloads", fileName))
 			defer f.Close()
-			fmt.Println("downloading " + fileName)
 			peer.DownloadFile(fileName, f)
+			break
 		}
 	}
 }

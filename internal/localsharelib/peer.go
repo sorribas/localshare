@@ -26,10 +26,12 @@ func (peer *Peer) ListFiles() ([]RemoteFile, error) {
 	if len(errs) > 0 {
 		return []RemoteFile{}, errs[0]
 	}
+
 	err := json.Unmarshal([]byte(body), &r)
 	if err != nil {
 		return []RemoteFile{}, err
 	}
+
 	return r, nil
 }
 
@@ -45,9 +47,11 @@ func (peer *Peer) DownloadFile(name string, w io.Writer) error {
 	if err != nil {
 		return err
 	}
+
 	_, err = io.Copy(w, resp.Body)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

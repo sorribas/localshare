@@ -1,2 +1,4 @@
 frontend/bundle.js
 frontend/node_modules/
+internal/webui/bindata.go
+localshare
