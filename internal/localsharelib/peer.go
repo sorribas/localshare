@@ -7,12 +7,12 @@ import "io"
 import "strconv"
 
 type Peer struct {
-	Name  string
+	Name  string `json:"name"`
 	entry zeroconf.ServiceEntry
 }
 
 type RemoteFile struct {
-	Name string
+	Name string `json:"name"`
 }
 
 func NewPeer(entry zeroconf.ServiceEntry) *Peer {

@@ -1,0 +1,41 @@
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-family: monospace;
+}
+
+html {
+  margin: 0;
+}
+
+h1 {
+  margin: 0;
+}
+
+.header {
+  background-color: #59f;
+  color: #fff;
+  padding: 10px;
+}
+
+.container {
+  margin: 10px;
+}
+
+.section {
+}
+
+.btn {
+  width: 100%;
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+.remote-file {
+  padding-left: 10px;
+}

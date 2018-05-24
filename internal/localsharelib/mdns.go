@@ -32,10 +32,12 @@ func (instance *LocalshareInstance) startMdnsDiscoverer() {
 		for entry := range results {
 			if entry.Instance != instance.peerId {
 				peer := NewPeer(*entry)
-				instance.peers = append(instance.peers, peer)
+				instance.Peers = append(instance.Peers, peer)
 				instance.peerCh <- peer
 			}
 		}
+
+		log.Println("DONE")
 	}(entries)
 
 	err = resolver.Browse(instance.ctx, "_edsfoobar._tcp", "local.", entries)

@@ -1,21 +1,13 @@
 package main
 
-import "bytes"
-import "fmt"
 import "github.com/sorribas/localshare/internal/localsharelib"
+import "github.com/sorribas/localshare/internal/webui"
 
 func main() {
-	var buf bytes.Buffer
 	lsi := localsharelib.NewLocalshareInstance()
-	lsi.Start()
-	lsi.AddFile(localsharelib.NewInMemoryFile("test", []byte("tst")))
+	// gui := &ui.UI{Ls: &lsi}
+	// gui.Start()
 
-	ch := lsi.PeerChannel()
-	for {
-		peer := <-ch
-		files, err := peer.ListFiles()
-		fmt.Println(files, err)
-		peer.DownloadFile(files[0].Name, &buf)
-		fmt.Println(buf.String())
-	}
+	lsi.Start()
+	webui.Start(&lsi)
 }

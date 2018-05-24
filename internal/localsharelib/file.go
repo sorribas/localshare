@@ -14,6 +14,10 @@ type FsFile struct {
 	name string
 }
 
+func NewFsFile(path, name string) *FsFile {
+	return &FsFile{path, name}
+}
+
 func (fsFile *FsFile) Name() string {
 	return fsFile.name
 }
@@ -24,6 +28,10 @@ func (fsFile *FsFile) Open() (io.Reader, error) {
 
 func (instance *LocalshareInstance) AddFile(f File) {
 	instance.files[f.Name()] = f
+}
+
+func (instance *LocalshareInstance) SharedFiles() map[string]File {
+	return instance.files
 }
 
 type InMemoryFile struct {

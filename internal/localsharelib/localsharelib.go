@@ -7,7 +7,7 @@ type LocalshareInstance struct {
 	cancel context.CancelFunc
 	port   int
 	files  map[string]File
-	peers  []*Peer
+	Peers  []*Peer
 	peerId string
 	peerCh chan *Peer
 }
