@@ -38,4 +38,18 @@ h1 {
 
 .remote-file {
   padding-left: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.progress-bar {
+  background-color: #aaa;
+  width: 100px;
+  height: 20px;
+  margin-left: 10px;
+}
+
+.progress-bar-inner {
+  background-color: #4CAF50;
+  height: 100%;
 }

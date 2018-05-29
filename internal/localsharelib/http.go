@@ -38,7 +38,7 @@ func (instance *LocalshareInstance) routes() http.Handler {
 func (instance *LocalshareInstance) filesRoute(w http.ResponseWriter, r *http.Request) {
 	data := []map[string]string{}
 	for _, file := range instance.files {
-		data = append(data, map[string]string{"name": file.Name()})
+		data = append(data, map[string]string{"name": file.Name(), "size": strconv.FormatInt(file.Size(), 10)})
 	}
 	sendjson(w, data)
 }

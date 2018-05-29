@@ -7,12 +7,14 @@ import "os/user"
 import "path"
 import "github.com/zserge/webview"
 import "github.com/sorribas/localshare/internal/localsharelib"
+import "strconv"
 
 type LocalShareWebBindings struct {
-	lsi   *localsharelib.LocalshareInstance
-	w     webview.WebView
-	Peers []*localsharelib.Peer    `json:"peers"`
-	Files []serializableSharedFile `json:"files"`
+	lsi       *localsharelib.LocalshareInstance
+	w         webview.WebView
+	Peers     []*localsharelib.Peer    `json:"peers"`
+	Files     []serializableSharedFile `json:"files"`
+	Downloads map[string]float64       `json:"downloads"`
 }
 
 type serializableSharedFile struct {
@@ -35,10 +37,14 @@ func Start(lsi *localsharelib.LocalshareInstance) {
 	w.Eval(string(MustAsset("frontend/bundle.js")))
 
 	lsi.AddFile(localsharelib.NewInMemoryFile("test", []byte("tst")))
-	lswb := &LocalShareWebBindings{lsi, w, []*localsharelib.Peer{}, []serializableSharedFile{}}
-	w.Dispatch(func() {
-		w.Bind("localshare", lswb)
-	})
+	lswb := &LocalShareWebBindings{
+		lsi,
+		w,
+		[]*localsharelib.Peer{},
+		[]serializableSharedFile{},
+		map[string]float64{},
+	}
+	lswb.updateFrontend()
 
 	go lswb.listenForPeers()
 
@@ -46,25 +52,42 @@ func Start(lsi *localsharelib.LocalshareInstance) {
 }
 
 func (lswb *LocalShareWebBindings) Download(peerName string, fileName string) {
-	for _, peer := range lswb.lsi.Peers {
-		if peer.Name == peerName {
-			usr, _ := user.Current()
-			f, _ := os.Create(path.Join(usr.HomeDir, "Downloads", fileName))
-			defer f.Close()
-			peer.DownloadFile(fileName, f)
-			break
+	go func() {
+		lswb.Downloads[peerName+"|"+fileName] = 0
+		for _, peer := range lswb.lsi.Peers {
+			if peer.Name == peerName {
+
+				// find the file size
+
+				var fileSize int64
+				for _, file := range peer.FileList {
+					if file.Name == fileName {
+						fileSize, _ = strconv.ParseInt(file.Size, 10, 64)
+					}
+				}
+
+				usr, _ := user.Current()
+				f, _ := os.Create(path.Join(usr.HomeDir, "Downloads", fileName))
+				defer f.Close()
+				ch := make(chan int64)
+				peer.DownloadFileWithProgress(fileName, f, ch)
+				for progress := range ch {
+					lswb.Downloads[peerName+"|"+fileName] = float64(progress) / float64(fileSize)
+					lswb.updateFrontend()
+				}
+				lswb.Downloads[peerName+"|"+fileName] = float64(1)
+				lswb.updateFrontend()
+				break
+			}
 		}
-	}
+	}()
 }
 
 func (lswb *LocalShareWebBindings) ChooseFile() {
 	filePath := lswb.w.Dialog(webview.DialogTypeOpen, 0, "", "")
 	lswb.lsi.AddFile(localsharelib.NewFsFile(filePath, path.Base(filePath)))
 	lswb.Files = filesToSerializable(lswb.lsi.SharedFiles())
-	lswb.w.Dispatch(func() {
-		lswb.w.Bind("localshare", lswb)
-		lswb.w.Eval("window.update()")
-	})
+	lswb.updateFrontend()
 }
 
 func (lswb *LocalShareWebBindings) listenForPeers() {
@@ -74,12 +97,16 @@ func (lswb *LocalShareWebBindings) listenForPeers() {
 			<-ch
 			lswb.Peers = lswb.lsi.Peers
 			fmt.Println("new peer list", lswb.Peers)
-			lswb.w.Dispatch(func() {
-				lswb.w.Bind("localshare", lswb)
-				lswb.w.Eval("window.update()")
-			})
+			lswb.updateFrontend()
 		}
 	}()
+}
+
+func (lswb *LocalShareWebBindings) updateFrontend() {
+	lswb.w.Dispatch(func() {
+		lswb.w.Bind("localshare", lswb)
+		lswb.w.Eval("window.update()")
+	})
 }
 
 func filesToSerializable(files map[string]localsharelib.File) []serializableSharedFile {

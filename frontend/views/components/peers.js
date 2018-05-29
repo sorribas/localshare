@@ -26,7 +26,17 @@ function peerList(state, emit) {
 
     function renderRemoteFile (f) {
       var download = () => emit('download-file', {peer: p.name, file: f.name})
-      return html`<div class="remote-file">- <a onclick=${download} href="#">${f.name}</a></div>`
+      return html`<div class="remote-file">
+        - <a onclick=${download} href="#">${f.name}</a>
+        ${downloadIndicator(state.downloads, p.name, f.name)}
+      </div>`
     }
   }
+}
+
+function downloadIndicator(downloads, peer, file) {
+  if (!downloads[`${peer}|${file}`]) return
+  return html`<div class="progress-bar">
+    <div class="progress-bar-inner" style="width: ${downloads[`${peer}|${file}`] * 100}%"></div>
+  </div>`
 }

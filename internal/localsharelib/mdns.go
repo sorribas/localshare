@@ -65,7 +65,7 @@ func (instance *LocalshareInstance) query() {
 					log.Println("\n\nFETCHING!\n\n")
 					flist, err := peer.ListFiles()
 					if err != nil {
-						log.Fatalln("Error getting peer's file list.")
+						log.Fatalln("Error getting peer's file list.", err)
 					}
 					newFileLists[peer.Name] = fileList{peerHash, flist}
 				} else {

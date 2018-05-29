@@ -3,8 +3,10 @@ package localsharelib
 import "encoding/json"
 import "github.com/grandcat/zeroconf"
 import "github.com/parnurzeal/gorequest"
+import "github.com/sorribas/localshare/internal/writercounter"
 import "io"
 import "strconv"
+import "time"
 
 type Peer struct {
 	Name     string       `json:"name"`
@@ -14,6 +16,7 @@ type Peer struct {
 
 type RemoteFile struct {
 	Name string `json:"name"`
+	Size string `json:"size"`
 }
 
 func NewPeer(entry zeroconf.ServiceEntry) *Peer {
@@ -56,4 +59,24 @@ func (peer *Peer) DownloadFile(name string, w io.Writer) error {
 	}
 
 	return nil
+}
+
+func (peer *Peer) DownloadFileWithProgress(name string, w io.Writer, progress chan int64) {
+	closed := false
+	wc := writercounter.NewWriterCounter(w)
+	go func() {
+		peer.DownloadFile(name, wc)
+		closed = true
+		close(progress)
+	}()
+
+	go func() {
+		for {
+			time.Sleep(250 * time.Millisecond)
+			if closed {
+				break
+			}
+			progress <- wc.Count
+		}
+	}()
 }
