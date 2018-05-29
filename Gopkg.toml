@@ -1,0 +1,19 @@
+[[constraint]]
+  name = "github.com/go-chi/chi"
+  version = "3.3.2"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/grandcat/zeroconf"
+
+[[constraint]]
+  name = "github.com/parnurzeal/gorequest"
+  version = "0.2.15"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/zserge/webview"
+
+[prune]
+  go-tests = true
+  unused-packages = true
