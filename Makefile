@@ -4,6 +4,9 @@ go_source_files := $(shell find . -name '*.go' ! -path 'frontend/*')
 localshare: ${go_source_files}
 	go build
 
+run: localshare
+	./localshare
+
 internal/webui/bindata.go: frontend/bundle.js frontend/index.html frontend/style.css
 	go-bindata -pkg webui -o internal/webui/bindata.go frontend/bundle.js frontend/index.html frontend/style.css
 
