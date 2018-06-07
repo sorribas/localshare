@@ -1,4 +1,4 @@
-js_source_files := $(shell find frontend/ -name '*.js' ! -path 'frontend/bundle-es5.js' ! -path 'frontend/bundle.js' ! -path 'frontend/node_modules/*')
+js_source_files := $(shell find frontend -name '*.js' ! -path 'frontend/bundle-es5.js' ! -path 'frontend/bundle.js' ! -path 'frontend/node_modules/*')
 go_source_files := $(shell find . -name '*.go' ! -path 'frontend/*')
 
 localshare: ${go_source_files} internal/webui/bindata.go
