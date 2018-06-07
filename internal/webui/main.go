@@ -33,8 +33,10 @@ func Start(lsi *localsharelib.LocalshareInstance) {
 		Debug:     true,
 	})
 
-	w.InjectCSS(string(MustAsset("frontend/style.css")))
-	w.Eval(string(MustAsset("frontend/bundle.js")))
+	w.Dispatch(func() {
+		w.InjectCSS(string(MustAsset("frontend/style.css")))
+		w.Eval(string(MustAsset("frontend/bundle.js")))
+	})
 
 	lsi.AddFile(localsharelib.NewInMemoryFile("test", []byte("tst")))
 	lswb := &LocalShareWebBindings{
