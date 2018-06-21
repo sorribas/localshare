@@ -39,13 +39,13 @@ bundle-win:
 bundle-all: bundle-mac bundle-linux bundle-win
 
 release-mac: bundle-mac
-	zip -r -X release/localshare-macOS.zip $(mac_release_path)
+	zip -r -X release/localshare-macOS-$(app_version).zip $(mac_release_path)
 
 release-linux: bundle-linux
-	zip -r -X release/localshare-linux.zip $(linux_release_path)
+	zip -r -X release/localshare-linux-$(app_version).zip $(linux_release_path)
 
 release-win: bundle-win
-	zip -r -X release/localshare-windows.zip $(win_release_path)
+	zip -r -X release/localshare-windows-$(app_version).zip $(win_release_path)
 
 release-all: release-mac release-linux release-win
 
