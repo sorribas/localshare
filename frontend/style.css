@@ -36,10 +36,8 @@ h1 {
   font-size: 16px;
 }
 
-.remote-file {
-  padding-left: 10px;
-  display: flex;
-  align-items: center;
+.remote-files {
+  min-width: 80%;
 }
 
 .progress-bar {
@@ -47,9 +45,16 @@ h1 {
   width: 100px;
   height: 20px;
   margin-left: 10px;
+  border: 1px solid #000;
+  text-align: center;
 }
 
 .progress-bar-inner {
   background-color: #4CAF50;
   height: 100%;
+  color: #fff;
+}
+
+.no-peers {
+  font-style: italic;
 }

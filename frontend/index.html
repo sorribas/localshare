@@ -5,6 +5,20 @@
   <title></title>
 </head>
 <body>
-  <div></div>
+  <div id="app"></div>
+  <div id="clipboard-div"></div>
+
+  <script>
+    function copytoclipboard(txt) {
+      var el = document.createElement('input')
+      var div = document.getElementById('clipboard-div')
+      div.appendChild(el)
+      el.type = 'text'
+      el.value = txt 
+      el.select()
+      document.execCommand('copy')
+      div.innerHTML = ''
+    }
+  </script>
 </body>
 </html>

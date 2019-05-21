@@ -17,6 +17,10 @@ function shareComponent (state, emit) {
 }
 
 function fileList (state, emit) {
+  if (!state.sharedFiles.length) {
+    return html`<center class="no-peers">No files shared</center>`
+  }
+
   return html`
     <div>
       ${state.sharedFiles.map(renderFile)}
