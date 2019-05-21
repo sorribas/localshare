@@ -57,7 +57,7 @@ func getFirstIp() string {
 }
 
 func (instance *LocalshareInstance) GetServerURL() string {
-	return "localshare" + getFirstIp() + ":" + strconv.Itoa(instance.port) + "/api/files/"
+	return getFirstIp() + ":" + strconv.Itoa(instance.port) + "/api/files"
 }
 
 func sendjson(w http.ResponseWriter, data interface{}) {
