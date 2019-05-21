@@ -17,6 +17,7 @@ function store (state, emitter) {
     state.peers = localshare.data.peers
     state.sharedFiles = localshare.data.files
     state.downloads = localshare.data.downloads
+    state.serverUrl = localshare.data.serverUrl
     emitter.emit('render')
   }
 }

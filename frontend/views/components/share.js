@@ -28,6 +28,10 @@ function fileList (state, emit) {
   `
 
   function renderFile (file) {
-    return html`<div>${file.name}</div>`
+    return html`<div>${file.name} <a href="#" onclick=${copy}>(Copy link)</a></div>`
+
+    function copy() {
+      copytoclipboard(`${state.serverUrl}/${file.name}`)
+    }
   }
 }

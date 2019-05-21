@@ -10,11 +10,18 @@ import "github.com/sorribas/localshare/internal/localsharelib"
 import "strconv"
 
 type LocalShareWebBindings struct {
-	lsi       *localsharelib.LocalshareInstance
-	w         webview.WebView
-	Peers     []*localsharelib.Peer    `json:"peers"`
-	Files     []serializableSharedFile `json:"files"`
-	Downloads map[string]float64       `json:"downloads"`
+	lsi   *localsharelib.LocalshareInstance
+	w     webview.WebView
+	Peers []*localsharelib.Peer    `json:"peers"`
+	Files []serializableSharedFile `json:"files"`
+	//Downloads map[string]float64       `json:"downloads"`
+	Downloads map[string]DownloadData `json:"downloads"`
+	ServerUrl string                  `json:"serverUrl"`
+}
+
+type DownloadData struct {
+	Progress float64 `json:"progress"`
+	FileName string  `json:"fileName"`
 }
 
 type serializableSharedFile struct {
@@ -38,13 +45,14 @@ func Start(lsi *localsharelib.LocalshareInstance) {
 		w.Eval(string(MustAsset("frontend/bundle-es5.js")))
 	})
 
-	lsi.AddFile(localsharelib.NewInMemoryFile("test", []byte("tst")))
+	// lsi.AddFile(localsharelib.NewInMemoryFile("test", []byte("tst")))
 	lswb := &LocalShareWebBindings{
 		lsi,
 		w,
 		[]*localsharelib.Peer{},
 		[]serializableSharedFile{},
-		map[string]float64{},
+		map[string]DownloadData{},
+		lsi.GetServerURL(),
 	}
 	lswb.updateFrontend()
 
@@ -55,7 +63,7 @@ func Start(lsi *localsharelib.LocalshareInstance) {
 
 func (lswb *LocalShareWebBindings) Download(peerName string, fileName string) {
 	go func() {
-		lswb.Downloads[peerName+"|"+fileName] = 0
+		lswb.Downloads[peerName+"|"+fileName] = DownloadData{}
 		for _, peer := range lswb.lsi.Peers {
 			if peer.Name == peerName {
 
@@ -69,15 +77,16 @@ func (lswb *LocalShareWebBindings) Download(peerName string, fileName string) {
 				}
 
 				usr, _ := user.Current()
-				f, _ := os.Create(path.Join(usr.HomeDir, "Downloads", fileName))
+				filePath := path.Join(usr.HomeDir, "Downloads", fileName)
+				f, _ := os.Create(filePath)
 				defer f.Close()
 				ch := make(chan int64)
 				peer.DownloadFileWithProgress(fileName, f, ch)
 				for progress := range ch {
-					lswb.Downloads[peerName+"|"+fileName] = float64(progress) / float64(fileSize)
+					lswb.Downloads[peerName+"|"+fileName] = DownloadData{Progress: float64(progress) / float64(fileSize), FileName: filePath}
 					lswb.updateFrontend()
 				}
-				lswb.Downloads[peerName+"|"+fileName] = float64(1)
+				lswb.Downloads[peerName+"|"+fileName] = DownloadData{Progress: float64(1), FileName: filePath}
 				lswb.updateFrontend()
 				break
 			}
