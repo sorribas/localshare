@@ -3,4 +3,5 @@ frontend/node_modules/
 internal/webui/bindata.go
 localshare
 vendor
+release
 frontend/bundle-es5.js
